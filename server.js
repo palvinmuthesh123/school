@@ -16,6 +16,7 @@ const containerRouter = require('./routes/containerRouter');
 const kitchenRouter = require('./routes/kitchenRouter');
 const schoolRouter = require('./routes/schoolRouter');
 const truckRouter = require('./routes/truckRouter');
+const assignRouter = require('./routes/assignRouter');
 const adminRouter = require('./routes/adminRouter');
 const orderRouter = require('./routes/orderRouter');
 const uploadRouter = require('./routes/uploadRouter');
@@ -61,6 +62,7 @@ app.get('/', (req, res) => {
 app.use('/api/payment', paymentRouter);
 app.use('/api/products', productRouter);
 app.use('/api/trucks', truckRouter);
+app.use('/api/assign', assignRouter);
 app.use('/api/schools', schoolRouter);
 app.use('/api/containers', containerRouter);
 app.use('/api/kitchens', kitchenRouter);

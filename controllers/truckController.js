@@ -90,6 +90,7 @@ exports.getAllTrucks = catchAsyncError(async (req, res) => {
       image: images && images[0] && images[0].url ? images[0].url : "",
       description,
     };
+    // console.log(newItem, "NNNNNNNNNNNNNN")
     return newItem;
   });
   res.status(200).json({
