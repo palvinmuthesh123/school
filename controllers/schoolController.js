@@ -80,13 +80,13 @@ exports.getAllSchools = catchAsyncError(async (req, res) => {
   const data = schools.map((item, index) => {
     const {
       _id: id,
-      schoolId,
+      name,
       images,
       description,
     } = item;
     const newItem = {
       id,
-      schoolId,
+      name,
       image: images && images[0] && images[0].url ? images[0].url : "",
       description,
     };
