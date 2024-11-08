@@ -14,4 +14,6 @@ router.route('/reviews').post(containerController.createContainerReview);
 // send all container reviews
 router.route('/reviews/:id').get(containerController.getAllReviews);
 
+router.route('/:id').put(containerController.updateContainer);
+
 module.exports = router;

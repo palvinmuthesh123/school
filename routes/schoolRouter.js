@@ -14,4 +14,7 @@ router.route('/reviews').post(schoolController.createSchoolReview);
 // send all school reviews
 router.route('/reviews/:id').get(schoolController.getAllReviews);
 
+// send all school reviews
+router.route('/:id').put(schoolController.updateSchool);
+
 module.exports = router;

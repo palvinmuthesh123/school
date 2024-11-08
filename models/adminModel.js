@@ -18,7 +18,31 @@ const adminSchema = new mongoose.Schema({
   },
   privilege: {
     type: String,
-    default: 'low',
+    default: 'super',
+  },
+  cooker: {
+    type: Boolean,
+    default: false,
+  },
+  container: {
+    type: Boolean,
+    default: false,
+  },
+  truck: {
+    type: Boolean,
+    default: false,
+  },
+  school: {
+    type: Boolean,
+    default: false,
+  },
+  kitchen: {
+    type: Boolean,
+    default: false,
+  },
+  fcm: {
+    type: String,
+    default: '',
   },
   password: {
     type: String,

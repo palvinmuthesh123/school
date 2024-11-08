@@ -5,7 +5,7 @@ const catchAsyncError = require('../middleware/CatchAsyncErrors');
 const { sendToken } = require('../utils/jwt');
 
 exports.registerAdmin = catchAsyncError(async (req, res, next) => {
-  const { name, email, password, privilege } = req.body;
+  const { name, email, password, privilege, cooker, container, truck, school, kitchen, fcm } = req.body;
   if (!name || !email || !password) {
     return next(new ErrorHandler('Missing fields', 400));
   }
@@ -14,6 +14,12 @@ exports.registerAdmin = catchAsyncError(async (req, res, next) => {
     email,
     privilege,
     password,
+    cooker,
+    container,
+    truck,
+    school,
+    kitchen,
+    fcm
   });
   res.status(200).json({
     success: true,
@@ -22,6 +28,12 @@ exports.registerAdmin = catchAsyncError(async (req, res, next) => {
       name: admin.name,
       email: admin.email,
       privilege: admin.privilege,
+      cooker: admin.cooker,
+      container: admin.container,
+      truck: admin.truck,
+      school: admin.school,
+      kitchen: admin.kitchen,
+      fcm: admin.fcm
     },
   });
 });
@@ -63,6 +75,12 @@ exports.getAllAdminDetails = catchAsyncError(async (req, res, next) => {
       name: item.name,
       email: item.email,
       privilege: item.privilege,
+      cooker: item.cooker,
+      container: item.container,
+      truck: item.truck,
+      school: item.school,
+      kitchen: item.kitchen,
+      fcm: item.fcm
     };
   });
   res.status(200).json({
@@ -103,31 +121,82 @@ exports.sendCurrentUser = catchAsyncError(async (req, res, next) => {
   sendToken(admin, 200, res);
 });
 
+// exports.updateAdminPrivilege = catchAsyncError(async (req, res, next) => {
+//   // const { privilege } = req.body;
+//   const { cooker, container, truck, school, kitchen, fcm } = req.body;
+//   console.log();
+//   if (!req.params.id) {
+//     return next(new ErrorHandler('User not found', 400));
+//   }
+//   // if (!cooker || !container || !truck || !school || !kitchen || !fcm) {
+//   //   return next(new ErrorHandler('Invalid: no data provided', 400));
+//   // }
+//   // if (!['super', 'moderate', 'low'].includes(privilege)) {
+//   //   return next(new ErrorHandler('Invalid: data invalid', 400));
+//   // }
+//   var admin = await Admin.findById(req.params.id);
+//   if (!admin) {
+//     return next(new ErrorHandler('User not found', 200));
+//   }
+//   if (admin.email === req.user.email) {
+//     return next(new ErrorHandler('Cannot change privilege for self', 400));
+//   }
+//   admin = Object.assign(admin, {
+//     cooker: cooker,
+//     container: container,
+//     truck: truck,
+//     school: school,
+//     kitchen: kitchen,
+//     fcm: fcm
+//   });
+
+//   await admin.save();
+//   res.status(200).json({
+//     success: true,
+//     data: admin,
+//   });
+// });
 exports.updateAdminPrivilege = catchAsyncError(async (req, res, next) => {
-  const { privilege } = req.body;
+  const { cookers, containers, trucks, schools, kitchens, fcm } = req.body;
+  
+  // Log request body for debugging
+  console.log("Request Body:", req.body);
+
+  // Check if ID parameter is provided
   if (!req.params.id) {
     return next(new ErrorHandler('User not found', 400));
   }
-  if (!privilege) {
-    return next(new ErrorHandler('Invalid: no data provided', 400));
-  }
-  if (!['super', 'moderate', 'low'].includes(privilege)) {
-    return next(new ErrorHandler('Invalid: data invalid', 400));
-  }
-  const admin = await Admin.findById(req.params.id);
+
+  // Find admin by ID
+  let admin = await Admin.findById(req.params.id);
   if (!admin) {
-    return next(new ErrorHandler('User not found', 200));
+    return next(new ErrorHandler('User not found', 404));
   }
+
+  // Prevent updating own privileges
   if (admin.email === req.user.email) {
     return next(new ErrorHandler('Cannot change privilege for self', 400));
   }
-  admin.privilege = privilege;
+
+  // Update fields directly
+  admin.cooker = cookers !== undefined ? cookers : admin.cooker;
+  admin.container = containers !== undefined ? containers : admin.container;
+  admin.truck = trucks !== undefined ? trucks : admin.truck;
+  admin.school = schools !== undefined ? schools : admin.school;
+  admin.kitchen = kitchens !== undefined ? kitchens : admin.kitchen;
+  admin.fcm = fcm !== undefined ? fcm : admin.fcm;
+
+  console.log(admin, "AAAAAAAAAAAAAAAAAA")
+
+  // Save updated admin
   await admin.save();
+
   res.status(200).json({
     success: true,
     data: admin,
   });
 });
+
 
 exports.deleteAdmin = catchAsyncError(async (req, res, next) => {
   if (!req.params.id) {
