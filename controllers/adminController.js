@@ -44,6 +44,7 @@ exports.loginAdmin = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler('Missing fields', 400));
   }
   const admin = await Admin.findOne({ email }).select('+password');
+  console.log(admin, "AAAAAAAAAAAAA")
   if (!admin) {
     return next(new ErrorHandler('Invalid email or password', 401));
   }
@@ -174,9 +175,9 @@ exports.updateAdminPrivilege = catchAsyncError(async (req, res, next) => {
   }
 
   // Prevent updating own privileges
-  if (admin.email === req.user.email) {
-    return next(new ErrorHandler('Cannot change privilege for self', 400));
-  }
+  // if (admin.email === req.user.email) {
+  //   return next(new ErrorHandler('Cannot change privilege for self', 400));
+  // }
 
   // Update fields directly
   admin.cooker = cookers !== undefined ? cookers : admin.cooker;
