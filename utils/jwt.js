@@ -21,6 +21,11 @@ exports.sendToken = (admin, statusCode, res) => {
         name: admin.name,
         email: admin.email,
         privilege: admin.privilege,
+        container: admin.container,
+        cooker: admin.cooker,
+        kitchen: admin.kitchen,
+        school: admin.school,
+        truck: admin.truck
       },
     });
 };
