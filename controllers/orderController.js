@@ -2,6 +2,7 @@ const Order = require('../models/orderModel');
 const Product = require('../models/productModel');
 const ErrorHandler = require('../utils/ErrorHandler');
 const catchAsyncError = require('../middleware/CatchAsyncErrors');
+const mongoose = require('mongoose');
 
 // create new order
 exports.createNewOrder = catchAsyncError(async (req, res, next) => {
@@ -45,6 +46,27 @@ exports.getSingleOrder = catchAsyncError(async (req, res, next) => {
       $elemMatch: { "cookerID": req.params.id }
     }
   });
+  if (!order) {
+    return next(new ErrorHandler('Order not found', 200));
+  }
+  res.status(200).json({
+    success: true,
+    data: order,
+  });
+});
+
+// send driver order
+exports.getDriverOrder = catchAsyncError(async (req, res, next) => {
+  if (!req.params.id) {
+    return next(new ErrorHandler('Order not found', 400));
+  }
+  // const order = await Order.findById(req.params.id);
+  console.log(req.params, req.params.id, "PPPPPPPPPPPPPPP")
+  
+  const order = await Order.find({
+    "driver._id": mongoose.Types.ObjectId(req.params.id)
+  });
+
   if (!order) {
     return next(new ErrorHandler('Order not found', 200));
   }

@@ -11,6 +11,9 @@ router.route('/').post(orderController.getUserOrders);
 // send single order
 router.route('/:id').get(orderController.getSingleOrder);
 
+// get single order
+router.route('/driver/:id').get(orderController.getDriverOrder);
+
 // update single order status
 router.route('/:id').put(orderController.updateOrderStatus);
 
