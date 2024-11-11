@@ -91,29 +91,12 @@ exports.updateOrderStatus = catchAsyncError(async (req, res, next) => {
   if (!order) {
     return next(new ErrorHandler('Order not found', 200));
   }
-  if (order.orderStatus === 'delivered') {
+  if (order.status === 'DELIVERED') {
     return next(new ErrorHandler('You have already delivered this order', 400));
   }
-  if (req.body.status === 'confirmed') {
-    let successCount = 0;
-    let failureCount = 0;
-    let orderLength = order.orderItems.length;
-    for (let index = 0; index < orderLength; index++) {
-      const item = order.orderItems[index];
-      let success = await updateStock(item.product, item.quantity);
-      if (success) {
-        successCount += 1;
-      } else {
-        failureCount += 1;
-      }
-    }
-    if (failureCount > 0) {
-      return next(new ErrorHandler('Product out of stock', 400));
-    }
-  }
-  order.orderStatus = req.body.status;
-  if (req.body.status === 'delivered') {
-    order.deliveredAt = Date.now();
+  order.status = req.body.status;
+  if (req.body.status === 'DELIVERED') {
+    order.createdAt = Date.now();
   }
   await order.save({ validateBeforeSave: false });
   res.status(200).json({
