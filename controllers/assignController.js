@@ -10,6 +10,7 @@ const truckModel = require('../models/truckModel');
 const orderModel = require('../models/orderModel');
 const productModel = require('../models/productModel');
 const adminModel = require('../models/adminModel');
+const mongoose = require('mongoose');
 
 exports.createCookerAssign = catchAsyncError(async (req, res, next) => {
   const truck = await CookerAssign.create(req.body);
@@ -29,6 +30,7 @@ exports.createContainerAssign = catchAsyncError(async (req, res, next) => {
 });
 
 exports.createTruckAssign = catchAsyncError(async (req, res, next) => {
+ 
   const truck = await TruckAssign.create(req.body);
   const truckData = await truckModel.find({truckId: req.body.TruckID})
   const schoolData = await schoolModel.find({name: req.body.schoolName})
@@ -36,18 +38,17 @@ exports.createTruckAssign = catchAsyncError(async (req, res, next) => {
   const cookerDatas = await containerAssignModel.find({ containerID: { $in: conts } })
   const user = await adminModel.find({_id: req.body.driverId})
 
-  // console.log(req.body.driverId, user, "UUUUUUUUU")
-
   const cookerDatasWithDetails = await Promise.all(
     cookerDatas.map(async (cooker) => {
-      const cookerDetails = await productModel.findOne({ cookerID: cooker.cookerID });
+      const cookid = cooker.cookerID
+      const cookerDetails = await productModel.find({ cookerId: cookid });
       return {
         ...cooker.toObject(),
-        cookerDetails: cookerDetails ? cookerDetails : {}, // Add cookerDetails or an empty object if not found
+        cookerDetails: cookerDetails && cookerDetails.length>0 ? cookerDetails[0] : {},
       };
     })
   );
-
+  
   const datas = {
     school: schoolData[0],
     cooker: cookerDatasWithDetails,
@@ -55,7 +56,7 @@ exports.createTruckAssign = catchAsyncError(async (req, res, next) => {
     container: conts,
     driver: user[0]
   }
-
+  
   const order = await orderModel.create(datas);
   
   res.status(200).json({

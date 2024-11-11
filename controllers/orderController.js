@@ -4,8 +4,22 @@ const ErrorHandler = require('../utils/ErrorHandler');
 const catchAsyncError = require('../middleware/CatchAsyncErrors');
 const mongoose = require('mongoose');
 const admin = require('firebase-admin');
-const serviceAccount = require('../credentials.json');
 const adminModel = require('../models/adminModel');
+
+const serviceAccount = {
+  type: process.env.FIREBASE_TYPE,
+  project_id: process.env.FIREBASE_PROJECT_ID,
+  private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+  private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'), // To handle line breaks
+  client_email: process.env.FIREBASE_CLIENT_EMAIL,
+  client_id: process.env.FIREBASE_CLIENT_ID,
+  auth_uri: process.env.FIREBASE_AUTH_URI,
+  token_uri: process.env.FIREBASE_TOKEN_URI,
+  auth_provider_x509_cert_url: process.env.FIREBASE_AUTH_PROVIDER_CERT_URL,
+  client_x509_cert_url: process.env.FIREBASE_CLIENT_CERT_URL,
+  universe_domain: process.env.UNIVERSE_DOMAIN,
+  databaseURL: process.env.DATABASE_URL
+};
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -47,19 +61,29 @@ exports.getSingleOrder = catchAsyncError(async (req, res, next) => {
   if (!req.params.id) {
     return next(new ErrorHandler('Order not found', 400));
   }
-  // const order = await Order.findById(req.params.id);
-  console.log(req.params, req.params.id, "PPPPPPPPPPPPPPP")
-  const order = await Order.find({
-    "cooker": { 
-      $elemMatch: { "cookerID": req.params.id }
-    }
+
+  const orders = await Order.find({
+    "cooker.cookerID": req.params.id
   });
-  if (!order) {
-    return next(new ErrorHandler('Order not found', 200));
+
+  if (!orders || orders.length === 0) {
+    return next(new ErrorHandler('Order not found', 404));
   }
+
+  const filteredOrders = orders.map(order => {
+    const filteredCooker = order.cooker.filter(c => c.cookerID === req.params.id);
+    const filteredContainerIDs = filteredCooker.map(c => c.containerID);
+    const uniqueContainerIDs = [...new Set(filteredContainerIDs.flat())];
+    return {
+      ...order.toObject(),
+      cooker: filteredCooker, 
+      container: uniqueContainerIDs,
+    };
+  });
+
   res.status(200).json({
     success: true,
-    data: order,
+    data: filteredOrders,
   });
 });
 
