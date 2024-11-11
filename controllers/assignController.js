@@ -9,6 +9,7 @@ const schoolModel = require('../models/schoolModel');
 const truckModel = require('../models/truckModel');
 const orderModel = require('../models/orderModel');
 const productModel = require('../models/productModel');
+const adminModel = require('../models/adminModel');
 
 exports.createCookerAssign = catchAsyncError(async (req, res, next) => {
   const truck = await CookerAssign.create(req.body);
@@ -33,7 +34,10 @@ exports.createTruckAssign = catchAsyncError(async (req, res, next) => {
   const schoolData = await schoolModel.find({name: req.body.schoolName})
   const conts = JSON.parse(req.body.containerID.replace(/'/g, '"'));
   const cookerDatas = await containerAssignModel.find({ containerID: { $in: conts } })
-  
+  const user = await adminModel.find({_id: req.body.driverId})
+
+  // console.log(req.body.driverId, user, "UUUUUUUUU")
+
   const cookerDatasWithDetails = await Promise.all(
     cookerDatas.map(async (cooker) => {
       const cookerDetails = await productModel.findOne({ cookerID: cooker.cookerID });
@@ -48,7 +52,8 @@ exports.createTruckAssign = catchAsyncError(async (req, res, next) => {
     school: schoolData[0],
     cooker: cookerDatasWithDetails,
     truck: truckData[0],
-    container: conts
+    container: conts,
+    driver: user[0]
   }
 
   const order = await orderModel.create(datas);

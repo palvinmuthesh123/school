@@ -13,9 +13,17 @@ const orderSchema = mongoose.Schema({
     type: Object,
     default: {}
   },
+  driver: {
+    type: Object,
+    default: {}
+  },
   container: {
     type: Array,
     default: []
+  },
+  status: {
+    type: String,
+    default: 'PENDING'
   },
   deliveredAt: Date,
   createdAt: {

@@ -38,7 +38,13 @@ exports.getSingleOrder = catchAsyncError(async (req, res, next) => {
   if (!req.params.id) {
     return next(new ErrorHandler('Order not found', 400));
   }
-  const order = await Order.findById(req.params.id);
+  // const order = await Order.findById(req.params.id);
+  console.log(req.params, req.params.id, "PPPPPPPPPPPPPPP")
+  const order = await Order.find({
+    "cooker": { 
+      $elemMatch: { "cookerID": req.params.id }
+    }
+  });
   if (!order) {
     return next(new ErrorHandler('Order not found', 200));
   }
