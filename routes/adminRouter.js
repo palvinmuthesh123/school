@@ -3,6 +3,10 @@ const router = require('express').Router();
 const adminController = require('../controllers/adminController');
 const productController = require('../controllers/productController');
 const orderController = require('../controllers/orderController');
+const containerController = require('../controllers/containerController');
+const truckController = require('../controllers/truckController');
+const kitchenController = require('../controllers/kitchenController');
+const schoolController = require('../controllers/schoolController');
 
 const auth = require('../middleware/Auth');
 
@@ -66,6 +70,42 @@ router
     auth.checkUserAuthentication,
     auth.checkAdminPrivileges('moderate', 'super'),
     productController.createProduct
+  );
+
+  // create a new container
+  router
+  .route('/container/new')
+  .post(
+    auth.checkUserAuthentication,
+    auth.checkAdminPrivileges('moderate', 'super'),
+    containerController.createContainer
+  );
+
+  // create a new truck
+  router
+  .route('/truck/new')
+  .post(
+    auth.checkUserAuthentication,
+    auth.checkAdminPrivileges('moderate', 'super'),
+    truckController.createTruck
+  );
+
+  // create a new kitchen
+  router
+  .route('/kitchen/new')
+  .post(
+    auth.checkUserAuthentication,
+    auth.checkAdminPrivileges('moderate', 'super'),
+    kitchenController.createKitchen
+  );
+
+  // create a new school
+  router
+  .route('/school/new')
+  .post(
+    auth.checkUserAuthentication,
+    auth.checkAdminPrivileges('moderate', 'super'),
+    schoolController.createSchool
   );
 
 // send, update, delete a single product

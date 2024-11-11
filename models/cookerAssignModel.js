@@ -18,6 +18,7 @@ const cookerAssignSchema = mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now(),
+    expires: 43200,
   },
 });
 

@@ -5,13 +5,14 @@ const catchAsyncError = require('../middleware/CatchAsyncErrors');
 const { sendToken } = require('../utils/jwt');
 
 exports.registerAdmin = catchAsyncError(async (req, res, next) => {
-  const { name, email, password, privilege, cooker, container, truck, school, kitchen, fcm } = req.body;
-  if (!name || !email || !password) {
+  const { name, email, password, privilege, cooker, container, truck, school, kitchen, fcm, mobile } = req.body;
+  if (!name || !email || !password || !mobile) {
     return next(new ErrorHandler('Missing fields', 400));
   }
   const admin = await Admin.create({
     name,
     email,
+    mobile,
     privilege,
     password,
     cooker,
@@ -33,6 +34,7 @@ exports.registerAdmin = catchAsyncError(async (req, res, next) => {
       truck: admin.truck,
       school: admin.school,
       kitchen: admin.kitchen,
+      mobile: admin.mobile,
       fcm: admin.fcm
     },
   });
@@ -220,7 +222,6 @@ exports.updateAdminPrivilege = catchAsyncError(async (req, res, next) => {
   });
 });
 
-
 exports.deleteAdmin = catchAsyncError(async (req, res, next) => {
   if (!req.params.id) {
     return next(new ErrorHandler('User not found', 400));
@@ -235,6 +236,6 @@ exports.deleteAdmin = catchAsyncError(async (req, res, next) => {
   await admin.remove();
   res.status(200).json({
     success: true,
-    message: 'Admin deleted',
+    message: 'User deleted',
   });
 });

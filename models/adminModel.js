@@ -16,6 +16,12 @@ const adminSchema = new mongoose.Schema({
     unique: true,
     validate: [validator.isEmail, 'Please enter a valid email'],
   },
+  mobile: {
+    type: String,
+    required: [true, 'Please provide a mobile number'],
+    maxlength: [10, 'Name cannot exceed 10 characters'],
+    minLength: [10, 'Name must be atleast 10 characters long'],
+  },
   privilege: {
     type: String,
     default: 'super',
