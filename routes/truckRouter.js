@@ -14,4 +14,8 @@ router.route('/reviews').post(truckController.createTruckReview);
 // send all truck reviews
 router.route('/reviews/:id').get(truckController.getAllReviews);
 
+router.route('/:id').put(truckController.updateTruck);
+
+router.route('/:id').delete(truckController.deleteTruck);
+
 module.exports = router;

@@ -14,4 +14,8 @@ router.route('/reviews').post(kitchenController.createKitchenReview);
 // send all kitchen reviews
 router.route('/reviews/:id').get(kitchenController.getAllReviews);
 
+router.route('/:id').put(kitchenController.updateKitchen);
+
+router.route('/:id').delete(kitchenController.deleteKitchen);
+
 module.exports = router;

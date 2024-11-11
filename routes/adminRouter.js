@@ -32,6 +32,14 @@ router
     adminController.getAllAdminDetails
   );
 
+  router
+  .route('/drivers')
+  .get(
+    auth.checkUserAuthentication,
+    auth.checkAdminPrivileges('super'),
+    adminController.getDriverDetails
+  );
+
 // get single admin details
 router
   .route('/users/:id')

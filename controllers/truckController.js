@@ -2,6 +2,8 @@ const Truck = require('../models/truckModel');
 const ErrorHandler = require('../utils/ErrorHandler');
 const catchAsyncError = require('../middleware/CatchAsyncErrors');
 const cloudinary = require('../config/cloudinary');
+const containerAssignModel = require('../models/containerAssignModel');
+const schoolModel = require('../models/schoolModel');
 
 // create a new truck
 exports.createTruck = catchAsyncError(async (req, res, next) => {
@@ -16,6 +18,7 @@ exports.createTruck = catchAsyncError(async (req, res, next) => {
   }
   req.body.images = [...newImages];
   const truck = await Truck.create(req.body);
+
   res.status(200).json({
     success: true,
     data: truck,

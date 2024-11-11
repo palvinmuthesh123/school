@@ -6,8 +6,8 @@ const containerAssignSchema = mongoose.Schema({
     required: [true, 'Please enter Container ID'],
   },
   cookerID: {
-    type: Array,
-    default: [],
+    type: String,
+    default: '',
     required: [true, 'Please enter Cooker ID'],
   },
   admin: {

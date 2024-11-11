@@ -16,4 +16,6 @@ router.route('/reviews/:id').get(containerController.getAllReviews);
 
 router.route('/:id').put(containerController.updateContainer);
 
+router.route('/:id').delete(containerController.deleteContainer);
+
 module.exports = router;

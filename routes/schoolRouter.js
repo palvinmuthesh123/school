@@ -17,4 +17,6 @@ router.route('/reviews/:id').get(schoolController.getAllReviews);
 // send all school reviews
 router.route('/:id').put(schoolController.updateSchool);
 
+router.route('/:id').delete(schoolController.deleteSchool);
+
 module.exports = router;

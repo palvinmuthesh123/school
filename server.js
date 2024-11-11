@@ -5,9 +5,23 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const http = require('http'); // Import the http module
+const socketIo = require('socket.io'); // Import Socket.io
 
 // initialize express
 const app = express();
+
+// Create HTTP server
+const server = http.createServer(app);
+
+// Initialize Socket.io with the HTTP server
+const io = socketIo(server, {
+  cors: {
+    origin: [/netlify\.app$/, /localhost:\d{4}$/], // Ensure this matches the client origins
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+});
 
 // requiring routers
 const paymentRouter = require('./routes/paymentRouter');
@@ -73,9 +87,24 @@ app.use('/api/upload', uploadRouter);
 // using other middlewares
 app.use(errorMiddleware);
 
-// starting server
-const server = app.listen(process.env.PORT || 5000, () => {
-  console.log('Server running');
+// Socket.io connection
+io.on('connection', (socket) => {
+  console.log('New socket connection:', socket.id);
+
+  // Emit a message when a new client connects
+  socket.emit('welcome', 'Welcome to the socket server!');
+
+  // Example of listening for events from clients
+  socket.on('newOrder', (orderData) => {
+    console.log('New order received:', orderData);
+    // Broadcast the new order to all clients
+    io.emit('newOrder', orderData);  // Emit the order to all connected clients
+  });
+
+  // Handle client disconnection
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
+  });
 });
 
 // unhandled promise rejection
@@ -85,4 +114,9 @@ process.on('unhandledRejection', (err) => {
   server.close(() => {
     process.exit(1);
   });
+});
+
+// starting server
+server.listen(process.env.PORT || 5000, () => {
+  console.log('Server running on port', process.env.PORT || 5000);
 });

@@ -14,4 +14,6 @@ router.route('/reviews').post(productController.createProductReview);
 // send all product reviews
 router.route('/reviews/:id').get(productController.getAllReviews);
 
+router.route('/:id').delete(productController.deleteProduct);
+
 module.exports = router;

@@ -90,6 +90,28 @@ exports.getAllAdminDetails = catchAsyncError(async (req, res, next) => {
   });
 });
 
+exports.getDriverDetails = catchAsyncError(async (req, res, next) => {
+  const admin = await Admin.find({school: true});
+  const adminData = admin.map((item) => {
+    return {
+      id: item._id,
+      name: item.name,
+      email: item.email,
+      privilege: item.privilege,
+      cooker: item.cooker,
+      container: item.container,
+      truck: item.truck,
+      school: item.school,
+      kitchen: item.kitchen,
+      fcm: item.fcm
+    };
+  });
+  res.status(200).json({
+    success: true,
+    data: adminData,
+  });
+});
+
 exports.getSingleAdminDetails = catchAsyncError(async (req, res, next) => {
   if (!req.params.id) {
     return next(new ErrorHandler('User not found', 400));
