@@ -227,6 +227,77 @@ exports.updateOrderStatus = catchAsyncError(async (req, res, next) => {
   
 });
 
+// Spoiled Alert
+
+exports.spoiledAlert = catchAsyncError(async (req, res, next) => {
+  const { id: containerID } = req.params;
+
+  // Validate inputs
+  if (!containerID) {
+    return next(new ErrorHandler('Container ID not provided', 400));
+  }
+
+  // Find orders associated with the given containerID
+  const orders = await Order.find({ container: containerID });
+
+  if (!orders || orders.length === 0) {
+    return next(new ErrorHandler('No orders found for the given Container ID', 404));
+  }
+
+  // Extract notifications and merge containers by unique FCM tokens
+  const notificationMap = new Map();
+
+  orders
+    .filter(order => order.driver?.fcm) // Ensure the driver has an FCM token
+    .forEach(order => {
+      const fcm = order.driver.fcm;
+      const containers = order.container;
+
+      if (notificationMap.has(fcm)) {
+        // If FCM token exists, merge containers
+        const existingNotification = notificationMap.get(fcm);
+        existingNotification.containers = [...new Set([...existingNotification.containers, ...containers])];
+      } else {
+        // If FCM token doesn't exist, add a new entry
+        notificationMap.set(fcm, { fcm, containers });
+      }
+    });
+
+  // Convert the Map to an array of notifications
+  const uniqueNotifications = Array.from(notificationMap.values());
+
+  // Prepare notification payloads
+  const payloads = uniqueNotifications.map(notification => ({
+    token: notification.fcm,
+    notification: {
+      title: "Spoiled Food Alert!",
+      body: `The following containers are spoiled: ${notification.containers.join(", ")}.`,
+    },
+    data: {
+      containerDetails: JSON.stringify(notification.containers), // Include container details as data
+    },
+  }));
+
+  // Send notifications using Firebase Admin
+  const sendResults = await Promise.allSettled(
+    payloads.map(payload => admin.messaging().send(payload))
+  );
+
+  // Count successes and failures
+  const successCount = sendResults.filter(result => result.status === "fulfilled").length;
+  const failureCount = sendResults.length - successCount;
+
+  // Respond to the client
+  res.status(200).json({
+    success: true,
+    message: "Notifications processed.",
+    results: {
+      successCount,
+      failureCount,
+    },
+  });
+});
+
 // delete order
 exports.deleteOrder = catchAsyncError(async (req, res, next) => {
   if (!req.params.id) {

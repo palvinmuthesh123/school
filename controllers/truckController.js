@@ -1,4 +1,5 @@
 const Truck = require('../models/truckModel');
+const Admin = require('../models/adminModel');
 const ErrorHandler = require('../utils/ErrorHandler');
 const catchAsyncError = require('../middleware/CatchAsyncErrors');
 const cloudinary = require('../config/cloudinary');
@@ -17,8 +18,21 @@ exports.createTruck = catchAsyncError(async (req, res, next) => {
     newImages.push({ public_id, url });
   }
   req.body.images = [...newImages];
+  const users = {
+    name: req.body.driver_name,
+    email: req.body.driver_email,
+    mobile: req.body.driver_number,
+    privilege: 'SUPER',
+    password: req.body.driver_password,
+    cooker: false,
+    container: false,
+    truck: true,
+    school: false,
+    kitchen: false,
+    fcm: ''
+  }
+  const user =  await Admin.create(users);
   const truck = await Truck.create(req.body);
-
   res.status(200).json({
     success: true,
     data: truck,
@@ -90,6 +104,7 @@ exports.getAllTrucks = catchAsyncError(async (req, res) => {
       description,
       driver_name,
       driver_number,
+      driver_email,
       route,
       kitchenId
     } = item;
@@ -100,6 +115,7 @@ exports.getAllTrucks = catchAsyncError(async (req, res) => {
       description,
       driver_name,
       driver_number,
+      driver_email,
       route,
       kitchenId
     };

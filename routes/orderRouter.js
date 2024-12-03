@@ -17,4 +17,7 @@ router.route('/driver/:id').get(orderController.getDriverOrder);
 // update single order status
 router.route('/:id').put(orderController.updateOrderStatus);
 
+// spoiled food alert
+router.route('/spoiled/:id').get(orderController.spoiledAlert);
+
 module.exports = router;
