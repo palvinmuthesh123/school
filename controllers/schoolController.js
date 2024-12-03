@@ -76,19 +76,23 @@ exports.deleteSchool = catchAsyncError(async (req, res, next) => {
 
 // send all school details
 exports.getAllSchools = catchAsyncError(async (req, res) => {
-  const schools = await School.find();
+  const { kitchenId } = req.query;
+  const query = kitchenId ? { kitchenId } : {};
+  const schools = await School.find(query);
   const data = schools.map((item, index) => {
     const {
       _id: id,
       name,
       images,
       description,
+      kitchenId
     } = item;
     const newItem = {
       id,
       name,
       image: images && images[0] && images[0].url ? images[0].url : "",
       description,
+      kitchenId
     };
     return newItem;
   });

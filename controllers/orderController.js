@@ -132,47 +132,99 @@ exports.getAllOrders = catchAsyncError(async (req, res, next) => {
 });
 
 // update order status
+// exports.updateOrderStatus = catchAsyncError(async (req, res, next) => {
+  
+//   if (!req.params.id) {
+//     return next(new ErrorHandler('Order not found', 400));
+//   }
+
+//   if (!req.body.status) {
+//     return next(new ErrorHandler('Invalid request', 400));
+//   }
+
+//   const order = await Order.findById(req.params.id);
+  
+//   if (!order) {
+//     return next(new ErrorHandler('Order not found', 200));
+//   }
+
+//   if (order.status === 'DELIVERED') {
+//     return next(new ErrorHandler('You have already delivered this order', 400));
+//   } else if (order.status === 'SPOILED') {
+//     return next(new ErrorHandler('The Order is Spoiled', 400));
+//   }
+
+//   if(req.body.status== 'SPOILED') {
+//     const user = await adminModel.find({_id: order.driver._id})
+//     const orderDetails = getCookerDetails(order)
+//     var foods = ''
+//     orderDetails.map((group, i) => {
+//       foods = foods!='' ? foods + ', ' + group.cookerDetails.description : foods + group.cookerDetails.description
+//     })
+//     const title = "Food is Spoiled !!!"
+//     const body = `Container ${order.container.join(",")} of ${foods} Got Spoiled`
+//     const message = {
+//       notification: { title, body },
+//       token: user[0].fcm,
+//     };
+//     const response = await admin.messaging().send(message);
+//   }
+
+//   // order.status = req.body.status;
+//   // order.createdAt = Date.now();
+//   // await order.save({ validateBeforeSave: false });
+//   res.status(200).json({
+//     success: true,
+//     data: order,
+//   });
+// });
+
 exports.updateOrderStatus = catchAsyncError(async (req, res, next) => {
+  
   if (!req.params.id) {
     return next(new ErrorHandler('Order not found', 400));
   }
-  if (!req.body.status) {
+  
+  if (!req.body.status || !req.body.cookerID) {
     return next(new ErrorHandler('Invalid request', 400));
   }
+  
   const order = await Order.findById(req.params.id);
+  
   if (!order) {
     return next(new ErrorHandler('Order not found', 200));
   }
+  
   if (order.status === 'DELIVERED') {
     return next(new ErrorHandler('You have already delivered this order', 400));
   } else if (order.status === 'SPOILED') {
     return next(new ErrorHandler('The Order is Spoiled', 400));
   }
-
-  if(req.body.status== 'SPOILED') {
-    const user = await adminModel.find({_id: order.driver._id})
-    const orderDetails = getCookerDetails(order)
-    var foods = ''
-    orderDetails.map((group, i) => {
-      foods = foods!='' ? foods + ', ' + group.cookerDetails.description : foods + group.cookerDetails.description
-    })
-    const title = "Food is Spoiled !!!"
-    const body = `Container ${order.container.join(",")} of ${foods} Got Spoiled`
+  
+  if (req.body.status === 'SPOILED') {
+    const filteredCooker = order.cooker.filter(c => c.cookerID === req.body.cookerID);
+    const filteredContainerIDs = filteredCooker.map(c => c.containerID);
+    const user = await adminModel.findOne({ _id: order.driver._id });
+    const foods = filteredCooker.map(c => c.cookerDetails.description).join(', ');
+    const title = "Food is Spoiled !!!";
+    const body = `Container ${filteredContainerIDs.join(", ")} of ${foods} Got Spoiled`;
+  
     const message = {
       notification: { title, body },
-      token: user[0].fcm,
+      token: user.fcm,
     };
-    const response = await admin.messaging().send(message);
+    await admin.messaging().send(message);
   }
-
-  order.status = req.body.status;
-  order.createdAt = Date.now();
-  await order.save({ validateBeforeSave: false });
+  
+  // order.status = req.body.status;
+  // order.updatedAt = Date.now();
+  // await order.save({ validateBeforeSave: false });
+  
   res.status(200).json({
     success: true,
     data: order,
   });
-
+  
 });
 
 // delete order

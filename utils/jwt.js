@@ -1,6 +1,5 @@
 const nodemon = require('nodemon');
 
-// create jwt token and save as a cookie
 exports.sendToken = (admin, statusCode, res) => {
   const token = admin.getJwtToken();
   const options = {

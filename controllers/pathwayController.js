@@ -1,10 +1,10 @@
-const Container = require('../models/containerModel');
+const Pathway = require('../models/pathwayModel');
 const ErrorHandler = require('../utils/ErrorHandler');
 const catchAsyncError = require('../middleware/CatchAsyncErrors');
 const cloudinary = require('../config/cloudinary');
 
-// create a new container
-exports.createContainer = catchAsyncError(async (req, res, next) => {
+// create a new pathway
+exports.createPathway = catchAsyncError(async (req, res, next) => {
   req.body.admin = req.user.id;
   let images = req.body.images;
   let newImages = [];
@@ -15,21 +15,21 @@ exports.createContainer = catchAsyncError(async (req, res, next) => {
     newImages.push({ public_id, url });
   }
   req.body.images = [...newImages];
-  const container = await Container.create(req.body);
+  const pathway = await Pathway.create(req.body);
   res.status(200).json({
     success: true,
-    data: container,
+    data: pathway,
   });
 });
 
-// update an existing container
-exports.updateContainer = catchAsyncError(async (req, res, next) => {
+// update an existing pathway
+exports.updatePathway = catchAsyncError(async (req, res, next) => {
   if (!req.params.id) {
-    return next(new ErrorHandler('Container Not Found', 400));
+    return next(new ErrorHandler('Pathway Not Found', 400));
   }
-  let container = await Container.findById(req.params.id);
-  if (!container) {
-    return next(new ErrorHandler('Container Not Found', 200));
+  let pathway = await Pathway.findById(req.params.id);
+  if (!pathway) {
+    return next(new ErrorHandler('Pathway Not Found', 200));
   }
   let images = req.body.images;
   let newImages = [];
@@ -44,53 +44,55 @@ exports.updateContainer = catchAsyncError(async (req, res, next) => {
     }
   }
   req.body.images = [...newImages];
-  container = await Container.findByIdAndUpdate(req.params.id, req.body, {
+  pathway = await Pathway.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
     useFindAndModify: false,
   });
   res.status(200).json({
     success: true,
-    container,
+    pathway,
   });
 });
 
-// delete an existing container
-exports.deleteContainer = catchAsyncError(async (req, res, next) => {
+// delete an existing pathway
+exports.deletePathway = catchAsyncError(async (req, res, next) => {
   if (!req.params.id) {
-    return next(new ErrorHandler('Container Not Found', 400));
+    return next(new ErrorHandler('Pathway Not Found', 400));
   }
-  const container = await Container.findById(req.params.id);
-  if (!container) {
-    return next(new ErrorHandler('Container Not Found', 200));
+  const pathway = await Pathway.findById(req.params.id);
+  if (!pathway) {
+    return next(new ErrorHandler('Pathway Not Found', 200));
   }
-  for (let i = 0; i < container.images.length; i++) {
-    await cloudinary.uploader.destroy(container.images[i].public_id);
+  for (let i = 0; i < pathway.images.length; i++) {
+    await cloudinary.uploader.destroy(pathway.images[i].public_id);
   }
-  await container.remove();
+  await pathway.remove();
   res.status(200).json({
     success: true,
-    message: 'Container deleted',
+    message: 'Pathway deleted',
   });
 });
 
-// send all container details
-exports.getAllContainers = catchAsyncError(async (req, res) => {
+// send all pathway details
+exports.getAllPathways = catchAsyncError(async (req, res) => {
   const { kitchenId } = req.query;
   const query = kitchenId ? { kitchenId } : {};
-  const containers = await Container.find(query);
-  const data = containers.map((item, index) => {
+  const pathways = await Pathway.find(query);
+  const data = pathways.map((item, index) => {
     const {
       _id: id,
-      containerId,
+      name,
       images,
+      schools,
       description,
       kitchenId
     } = item;
     const newItem = {
       id,
-      containerId,
+      name,
       image: images && images[0] && images[0].url ? images[0].url : "",
+      schools,
       description,
       kitchenId
     };
@@ -102,25 +104,25 @@ exports.getAllContainers = catchAsyncError(async (req, res) => {
   });
 });
 
-// send only a single container detaisl
-exports.getSingleContainer = catchAsyncError(async (req, res, next) => {
+// send only a single pathway detaisl
+exports.getSinglePathway = catchAsyncError(async (req, res, next) => {
   if (!req.params.id) {
-    return next(new ErrorHandler('Container Not Found', 400));
+    return next(new ErrorHandler('Pathway Not Found', 400));
   }
-  const container = await Container.findById(req.params.id);
-  if (!container) {
-    return next(new ErrorHandler('Container Not Found', 200));
+  const pathway = await Pathway.findById(req.params.id);
+  if (!pathway) {
+    return next(new ErrorHandler('Pathway Not Found', 200));
   }
   res.status(200).json({
     success: true,
-    data: container,
+    data: pathway,
   });
 });
 
-// review a container
-exports.createContainerReview = catchAsyncError(async (req, res, next) => {
-  const { rating, comment, containerId, name, email } = req.body;
-  if (!rating || !comment || !containerId || !name || !email) {
+// review a pathway
+exports.createPathwayReview = catchAsyncError(async (req, res, next) => {
+  const { rating, comment, pathwayId, name, email } = req.body;
+  if (!rating || !comment || !pathwayId || !name || !email) {
     return next(new ErrorHandler('Request invalid', 400));
   }
   // creating a review
@@ -130,13 +132,13 @@ exports.createContainerReview = catchAsyncError(async (req, res, next) => {
     rating: Number(rating),
     comment,
   };
-  const container = await Container.findById(containerId);
+  const pathway = await Pathway.findById(pathwayId);
   // check if the user already reviewed
-  const isReviewed = container.reviews.some((rev) => rev.email === email);
+  const isReviewed = pathway.reviews.some((rev) => rev.email === email);
   // user already review: update the review
   // user gives new review: add new review and update the number of reviews
   if (isReviewed) {
-    container.reviews.forEach((rev) => {
+    pathway.reviews.forEach((rev) => {
       if (rev.email === email) {
         rev.name = name;
         rev.rating = rating;
@@ -144,55 +146,55 @@ exports.createContainerReview = catchAsyncError(async (req, res, next) => {
       }
     });
   } else {
-    container.reviews.push(review);
-    container.numberOfReviews = container.reviews.length;
+    pathway.reviews.push(review);
+    pathway.numberOfReviews = pathway.reviews.length;
   }
-  // update container rating
+  // update pathway rating
   let avg = 0;
-  container.reviews.forEach((rev) => {
+  pathway.reviews.forEach((rev) => {
     avg += rev.rating;
   });
-  avg = avg / container.reviews.length;
-  container.rating = avg;
-  // save the container
-  await container.save({ validateBeforeSave: false });
+  avg = avg / pathway.reviews.length;
+  pathway.rating = avg;
+  // save the pathway
+  await pathway.save({ validateBeforeSave: false });
   // send success response
   res.status(200).json({
     success: true,
-    message: 'Container review created',
+    message: 'Pathway review created',
   });
 });
 
-// send all container reviews
+// send all pathway reviews
 exports.getAllReviews = catchAsyncError(async (req, res, next) => {
   if (!req.params.id) {
-    return next(new ErrorHandler('Container not found', 400));
+    return next(new ErrorHandler('Pathway not found', 400));
   }
-  const container = await Container.findById(req.params.id);
-  if (!container) {
-    return next(new ErrorHandler('Container not found', 200));
+  const pathway = await Pathway.findById(req.params.id);
+  if (!pathway) {
+    return next(new ErrorHandler('Pathway not found', 200));
   }
-  const reviews = container.reviews;
+  const reviews = pathway.reviews;
   res.status(200).json({
     success: true,
     data: reviews,
   });
 });
 
-// delete container review
+// delete pathway review
 exports.deleteReview = catchAsyncError(async (req, res, next) => {
   if (!req.params.id) {
-    return next(new ErrorHandler('Container not found', 400));
+    return next(new ErrorHandler('Pathway not found', 400));
   }
   const { reviewId } = req.body;
   if (!reviewId) {
     return next(new ErrorHandler('Review not found', 400));
   }
-  const container = await Container.findById(req.params.id);
-  if (!container) {
-    return next(new ErrorHandler('Container not found', 200));
+  const pathway = await Pathway.findById(req.params.id);
+  if (!pathway) {
+    return next(new ErrorHandler('Pathway not found', 200));
   }
-  const reviews = container.reviews.filter(
+  const reviews = pathway.reviews.filter(
     (rev) => rev._id.toString() !== reviewId.toString()
   );
   let avg = 0;
@@ -202,7 +204,7 @@ exports.deleteReview = catchAsyncError(async (req, res, next) => {
   avg = avg / reviews.length;
   const rating = avg || 0;
   const numberOfReviews = reviews.length;
-  await Container.findByIdAndUpdate(
+  await Pathway.findByIdAndUpdate(
     req.params.id,
     {
       rating,

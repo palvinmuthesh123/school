@@ -10,11 +10,11 @@ const containerSchema = mongoose.Schema({
     default: ""
     // required: [true, 'Please enter product description'],
   },
-  // price: {
-  //   type: Number,
-  //   required: [true, 'Please enter product price'],
-  //   maxLength: [8, 'Price cannot exceed 8 characters'],
-  // },
+  kitchenId: {
+    type: String,
+    required: [true, 'Please enter kitchen ID'],
+    default: ""
+  },
   // rating: {
   //   type: Number,
   //   default: 0,

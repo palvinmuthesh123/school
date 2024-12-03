@@ -7,6 +7,7 @@ const containerController = require('../controllers/containerController');
 const truckController = require('../controllers/truckController');
 const kitchenController = require('../controllers/kitchenController');
 const schoolController = require('../controllers/schoolController');
+const pathwayController = require('../controllers/pathwayController');
 
 const auth = require('../middleware/Auth');
 
@@ -106,6 +107,15 @@ router
     auth.checkUserAuthentication,
     auth.checkAdminPrivileges('moderate', 'super'),
     schoolController.createSchool
+  );
+
+  // create a new pathway
+  router
+  .route('/pathway/new')
+  .post(
+    auth.checkUserAuthentication,
+    auth.checkAdminPrivileges('moderate', 'super'),
+    pathwayController.createPathway
   );
 
 // send, update, delete a single product

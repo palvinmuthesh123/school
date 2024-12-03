@@ -10,6 +10,11 @@ const schoolSchema = mongoose.Schema({
     default: ""
     // required: [true, 'Please enter product description'],
   },
+  kitchenId: {
+    type: String,
+    required: [true, 'Please enter kitchen ID'],
+    default: ""
+  },
   // price: {
   //   type: Number,
   //   required: [true, 'Please enter product price'],

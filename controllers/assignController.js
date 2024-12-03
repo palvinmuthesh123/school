@@ -30,8 +30,8 @@ exports.createContainerAssign = catchAsyncError(async (req, res, next) => {
 });
 
 exports.createTruckAssign = catchAsyncError(async (req, res, next) => {
- 
-  const truck = await TruckAssign.create(req.body);
+
+  // const truck = await TruckAssign.create(req.body);
   const truckData = await truckModel.find({truckId: req.body.TruckID})
   const schoolData = await schoolModel.find({name: req.body.schoolName})
   const conts = JSON.parse(req.body.containerID.replace(/'/g, '"'));
@@ -57,11 +57,11 @@ exports.createTruckAssign = catchAsyncError(async (req, res, next) => {
     driver: user[0]
   }
   
-  const order = await orderModel.create(datas);
+  // const order = await orderModel.create(datas);
   
   res.status(200).json({
     success: true,
-    data: truck,
+    data: datas,
   });
   
 });

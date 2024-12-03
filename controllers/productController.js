@@ -76,19 +76,23 @@ exports.deleteProduct = catchAsyncError(async (req, res, next) => {
 
 // send all product details
 exports.getAllProducts = catchAsyncError(async (req, res) => {
-  const products = await Product.find();
+  const { kitchenId } = req.query;
+  const query = kitchenId ? { kitchenId } : {};
+  const products = await Product.find(query);
   const data = products.map((item, index) => {
     const {
       _id: id,
       cookerId,
       images,
       description,
+      kitchenId
     } = item;
     const newItem = {
       id,
       cookerId,
       image: images && images[0] && images[0].url ? images[0].url : "",
       description,
+      kitchenId
     };
     return newItem;
   });

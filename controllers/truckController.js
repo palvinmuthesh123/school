@@ -79,19 +79,29 @@ exports.deleteTruck = catchAsyncError(async (req, res, next) => {
 
 // send all truck details
 exports.getAllTrucks = catchAsyncError(async (req, res) => {
-  const trucks = await Truck.find();
+  const { kitchenId } = req.query;
+  const query = kitchenId ? { kitchenId } : {};
+  const trucks = await Truck.find(query);
   const data = trucks.map((item, index) => {
     const {
       _id: id,
       truckId,
       images,
       description,
+      driver_name,
+      driver_number,
+      route,
+      kitchenId
     } = item;
     const newItem = {
       id,
       truckId,
       image: images && images[0] && images[0].url ? images[0].url : "",
       description,
+      driver_name,
+      driver_number,
+      route,
+      kitchenId
     };
     // console.log(newItem, "NNNNNNNNNNNNNN")
     return newItem;

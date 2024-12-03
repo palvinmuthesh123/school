@@ -10,15 +10,26 @@ const truckSchema = mongoose.Schema({
     default: ""
     // required: [true, 'Please enter product description'],
   },
-  // price: {
-  //   type: Number,
-  //   required: [true, 'Please enter product price'],
-  //   maxLength: [8, 'Price cannot exceed 8 characters'],
-  // },
-  // rating: {
-  //   type: Number,
-  //   default: 0,
-  // },
+  driver_name: {
+    type: String,
+    default: ""
+    // required: [true, 'Please enter product description'],
+  },
+  driver_number: {
+    type: String,
+    default: ""
+    // required: [true, 'Please enter product description'],
+  },
+  route: {
+    type: String,
+    default: ""
+    // required: [true, 'Please enter product description'],
+  },
+  kitchenId: {
+    type: String,
+    required: [true, 'Please enter kitchen ID'],
+    default: ""
+  },
   images: [
     {
       public_id: {
