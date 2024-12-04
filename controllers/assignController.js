@@ -31,12 +31,12 @@ exports.createContainerAssign = catchAsyncError(async (req, res, next) => {
 
 exports.createTruckAssign = catchAsyncError(async (req, res, next) => {
 
-  // const truck = await TruckAssign.create(req.body);
+  const truck = await TruckAssign.create(req.body);
   const truckData = await truckModel.find({truckId: req.body.TruckID})
   const schoolData = await schoolModel.find({name: req.body.schoolName})
   const conts = JSON.parse(req.body.containerID.replace(/'/g, '"'));
   const cookerDatas = await containerAssignModel.find({ containerID: { $in: conts } })
-  const user = await adminModel.find({_id: req.body.driverId})
+  // const user = await adminModel.find({_id: req.body.driverId})
 
   const cookerDatasWithDetails = await Promise.all(
     cookerDatas.map(async (cooker) => {
@@ -54,14 +54,14 @@ exports.createTruckAssign = catchAsyncError(async (req, res, next) => {
     cooker: cookerDatasWithDetails,
     truck: truckData[0],
     container: conts,
-    driver: user[0]
+    driver: {}
   }
   
-  // const order = await orderModel.create(datas);
+  const order = await orderModel.create(datas);
   
   res.status(200).json({
     success: true,
-    data: datas,
+    data: truck,
   });
   
 });
