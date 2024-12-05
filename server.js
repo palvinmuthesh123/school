@@ -119,6 +119,6 @@ process.on('unhandledRejection', (err) => {
 });
 
 // starting server
-server.listen(process.env.PORT || 5000, () => {
+server.listen(process.env.PORT || 5000, '0.0.0.0', () => {
   console.log('Server running on port', process.env.PORT || 5000);
 });
