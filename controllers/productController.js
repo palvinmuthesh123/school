@@ -2,6 +2,7 @@ const Product = require('../models/productModel');
 const ErrorHandler = require('../utils/ErrorHandler');
 const catchAsyncError = require('../middleware/CatchAsyncErrors');
 const cloudinary = require('../config/cloudinary');
+const CookerAssign = require('../models/cookerAssignModel');
 
 // create a new product
 exports.createProduct = catchAsyncError(async (req, res, next) => {
@@ -77,25 +78,40 @@ exports.deleteProduct = catchAsyncError(async (req, res, next) => {
 // send all product details
 exports.getAllProducts = catchAsyncError(async (req, res) => {
   const { kitchenId } = req.query;
+
+  // Fetch all CookerAssign data
+  const cookerAssi = await CookerAssign.find({});
+  
+  // Extract all cookerId values from cookerAssi
+  const assignedCookerIds = cookerAssi.map((assign) => assign.cookerID);
+
+  // Create the query for products
   const query = kitchenId ? { kitchenId } : {};
+
+  // Fetch products
   const products = await Product.find(query);
-  const data = products.map((item, index) => {
-    const {
-      _id: id,
-      cookerId,
-      images,
-      description,
-      kitchenId
-    } = item;
-    const newItem = {
-      id,
-      cookerId,
-      image: images && images[0] && images[0].url ? images[0].url : "",
-      description,
-      kitchenId
-    };
-    return newItem;
-  });
+
+  // Filter and map products based on assignedCookerIds
+  const data = products
+    .filter((item) => assignedCookerIds.includes(item.cookerId))
+    .map((item) => {
+      const {
+        _id: id,
+        cookerId,
+        images,
+        description,
+        kitchenId
+      } = item;
+
+      return {
+        id,
+        cookerId,
+        image: images && images[0] && images[0].url ? images[0].url : "",
+        description,
+        kitchenId
+      };
+    });
+
   res.status(200).json({
     success: true,
     data,

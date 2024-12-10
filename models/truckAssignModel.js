@@ -10,11 +10,11 @@ const truckAssignSchema = mongoose.Schema({
     default: "",
     required: [true, 'Please enter School Name'],
   },
-  driverId: {
-    type: String,
-    default: "",
-    required: [true, 'Please enter Driver Name'],
-  },
+  // driverId: {
+  //   type: String,
+  //   default: "",
+  //   required: [true, 'Please enter Driver Name'],
+  // },
   containerID: {
     type: Array,
     default: [],

@@ -9,60 +9,97 @@ const schoolModel = require('../models/schoolModel');
 const truckModel = require('../models/truckModel');
 const orderModel = require('../models/orderModel');
 const productModel = require('../models/productModel');
+const pathwayModel = require('../models/pathwayModel');
 const adminModel = require('../models/adminModel');
 const mongoose = require('mongoose');
 
 exports.createCookerAssign = catchAsyncError(async (req, res, next) => {
-  const truck = await CookerAssign.create(req.body);
-  res.status(200).json({
-    success: true,
-    data: truck,
-  });
+  const cooker = await CookerAssign.find({cookerID: req.body.cookerID})
+  if(cooker.length==0) {
+    const truck = await CookerAssign.create(req.body);
+    res.status(200).json({
+      success: true,
+      data: truck,
+    });
+  }
+  else {
+    res.status(400).json({
+      success: false,
+      message: "Cooker Already Assigned !!!",
+    });
+  }
 });
 
 exports.createContainerAssign = catchAsyncError(async (req, res, next) => {
   // req.body.admin = req.user.id;
-  const truck = await ContainerAssign.create(req.body);
-  res.status(200).json({
-    success: true,
-    data: truck,
-  });
+  const cont = await ContainerAssign.find({containerID: req.body.containerID})
+  if(cont.length==0) {
+    const truck = await ContainerAssign.create(req.body);
+    res.status(200).json({
+      success: true,
+      data: truck,
+    });
+  }
+  else {
+    res.status(400).json({
+      success: false,
+      data: "Container Already Assigned !!!",
+    });
+  }
 });
 
 exports.createTruckAssign = catchAsyncError(async (req, res, next) => {
 
-  const truck = await TruckAssign.create(req.body);
-  const truckData = await truckModel.find({truckId: req.body.TruckID})
-  const schoolData = await schoolModel.find({name: req.body.schoolName})
-  const conts = JSON.parse(req.body.containerID.replace(/'/g, '"'));
-  const cookerDatas = await containerAssignModel.find({ containerID: { $in: conts } })
-  // const user = await adminModel.find({_id: req.body.driverId})
-
-  const cookerDatasWithDetails = await Promise.all(
-    cookerDatas.map(async (cooker) => {
-      const cookid = cooker.cookerID
-      const cookerDetails = await productModel.find({ cookerId: cookid });
-      return {
-        ...cooker.toObject(),
-        cookerDetails: cookerDetails && cookerDetails.length>0 ? cookerDetails[0] : {},
-      };
-    })
-  );
-  
-  const datas = {
-    school: schoolData[0],
-    cooker: cookerDatasWithDetails,
-    truck: truckData[0],
-    container: conts,
-    driver: {}
-  }
-  
-  const order = await orderModel.create(datas);
-  
-  res.status(200).json({
-    success: true,
-    data: truck,
+  const tru = await TruckAssign.find({TruckID: req.body.TruckID});
+  const truCont = await TruckAssign.find({
+    containerID: { $in: req.body.containerID },
   });
+  if(tru.length == 0 && truCont.length == 0) {
+    const truck = await TruckAssign.create(req.body);
+    const truckData = await truckModel.find({truckId: req.body.TruckID})
+    // const schoolData = await schoolModel.find({name: req.body.schoolName})
+    const schoolData = await pathwayModel.find({name: req.body.schoolName})
+    // const conts = JSON.parse(req.body.containerID.replace(/'/g, '"'));
+    const cookerDatas = await containerAssignModel.find({ containerID: { $in: req.body.containerID } })
+
+    const cookerDatasWithDetails = await Promise.all(
+      cookerDatas.map(async (cooker) => {
+        const cookid = cooker.cookerID
+        const cookerDetails = await productModel.find({ cookerId: cookid });
+        return {
+          ...cooker.toObject(),
+          cookerDetails: cookerDetails && cookerDetails.length>0 ? cookerDetails[0] : {},
+        };
+      })
+    );
+    
+    const datas = {
+      school: schoolData[0],
+      cooker: cookerDatasWithDetails,
+      truck: truckData[0],
+      container: req.body.containerID,
+      driver: {}
+    }
+    
+    const order = await orderModel.create(datas);
+    
+    res.status(200).json({
+      success: true,
+      data: truck,
+    });
+  }
+  else if(tru.length == 0) {
+    res.status(400).json({
+      success: false,
+      data: "Truck is Already Assigned with the Containers !!!",
+    });
+  } 
+  else if(truCont.length == 0) {
+    res.status(400).json({
+      success: false,
+      data: "Provided Containers is Already Assigned !!!",
+    });
+  }
   
 });
 
