@@ -54,8 +54,8 @@ router
     adminController.getSingleAdminDetails
   )
   .put(
-    auth.checkUserAuthentication,
-    auth.checkAdminPrivileges('super'),
+    // auth.checkUserAuthentication,
+    // auth.checkAdminPrivileges('super'),
     adminController.updateAdminPrivilege
   )
   .delete(
