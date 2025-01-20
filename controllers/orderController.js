@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const admin = require('firebase-admin');
 const adminModel = require('../models/adminModel');
 const serv = require('../credentials.json')
+const Admin = require('../models/adminModel');
 
 const serviceAccount = {
   type: process.env.FIREBASE_TYPE,
@@ -233,6 +234,8 @@ exports.updateOrderStatus = catchAsyncError(async (req, res, next) => {
 exports.spoiledAlert = catchAsyncError(async (req, res, next) => {
   const { id: containerID } = req.params;
 
+  console.log(containerID, "CCCCCCCCCCCCCCCCC");
+
   // Validate inputs
   if (!containerID) {
     return next(new ErrorHandler('Container ID not provided', 400));
@@ -241,6 +244,8 @@ exports.spoiledAlert = catchAsyncError(async (req, res, next) => {
   // Find orders associated with the given containerID
   const orders = await Order.find({ container: containerID });
 
+  console.log(orders, "OOOOOOOOOOOOOOOOOOOOOO");
+
   if (!orders || orders.length === 0) {
     return next(new ErrorHandler('No orders found for the given Container ID', 404));
   }
@@ -248,24 +253,40 @@ exports.spoiledAlert = catchAsyncError(async (req, res, next) => {
   // Extract notifications and merge containers by unique FCM tokens
   const notificationMap = new Map();
 
-  orders
-    .filter(order => order.driver?.fcm) // Ensure the driver has an FCM token
-    .forEach(order => {
-      const fcm = order.driver.fcm;
-      const containers = order.container;
+  for (const order of orders) {
+    console.log(order, "OOOOOOORRRRRRRDDDDDDEEEEEEERRRRRRRRRSSSSSSSSS")
+    if (!order.truck?.driver_number) {
+      console.log(`Order ${order._id} has no driver_number`);
+      continue;
+    }
 
-      if (notificationMap.has(fcm)) {
-        // If FCM token exists, merge containers
-        const existingNotification = notificationMap.get(fcm);
-        existingNotification.containers = [...new Set([...existingNotification.containers, ...containers])];
-      } else {
-        // If FCM token doesn't exist, add a new entry
-        notificationMap.set(fcm, { fcm, containers });
-      }
-    });
+    // Fetch the user (admin) details using the driver_number
+    const admin = await Admin.find({ mobile: order.truck.driver_number });
+
+    console.log(admin[0], "ADM>....................")
+
+    if (!admin[0] || !admin[0].fcm) {
+      console.log(`No FCM token found for driver_number: ${order.truck.driver_number}`);
+      continue;
+    }
+
+    const fcm = admin[0].fcm;
+    const containers = order.container;
+
+    if (notificationMap.has(fcm)) {
+      // If FCM token exists, merge containers
+      const existingNotification = notificationMap.get(fcm);
+      existingNotification.containers = [...new Set([...existingNotification.containers, ...containers])];
+    } else {
+      // If FCM token doesn't exist, add a new entry
+      notificationMap.set(fcm, { fcm, containers });
+    }
+  }
 
   // Convert the Map to an array of notifications
   const uniqueNotifications = Array.from(notificationMap.values());
+
+  console.log(uniqueNotifications, "UUUUUUUUUUUUUUUUUUUUUUUU");
 
   // Prepare notification payloads
   const payloads = uniqueNotifications.map(notification => ({
@@ -279,10 +300,14 @@ exports.spoiledAlert = catchAsyncError(async (req, res, next) => {
     },
   }));
 
+  console.log(payloads, "PPPPPPPPPPPPPPPPPPPP");
+
   // Send notifications using Firebase Admin
   const sendResults = await Promise.allSettled(
     payloads.map(payload => admin.messaging().send(payload))
   );
+
+  console.log(sendResults, "SSSSSSSSSSSSSSSSSSs");
 
   // Count successes and failures
   const successCount = sendResults.filter(result => result.status === "fulfilled").length;
