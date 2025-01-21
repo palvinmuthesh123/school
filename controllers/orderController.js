@@ -5,7 +5,7 @@ const catchAsyncError = require('../middleware/CatchAsyncErrors');
 const mongoose = require('mongoose');
 const admin = require('firebase-admin');
 const adminModel = require('../models/adminModel');
-const serv = require('../credentials.json')
+// const serv = require('../credentials.json')
 const Admin = require('../models/adminModel');
 
 const serviceAccount = {
