@@ -79,11 +79,11 @@ exports.deleteProduct = catchAsyncError(async (req, res, next) => {
 exports.getAllProducts = catchAsyncError(async (req, res) => {
   const { kitchenId } = req.query;
 
-  // Fetch all CookerAssign data
-  const cookerAssi = await CookerAssign.find({});
+  // // Fetch all CookerAssign data
+  // const cookerAssi = await CookerAssign.find({});
   
-  // Extract all cookerId values from cookerAssi
-  const assignedCookerIds = cookerAssi.map((assign) => assign.cookerID);
+  // // Extract all cookerId values from cookerAssi
+  // const assignedCookerIds = cookerAssi.map((assign) => assign.cookerID);
 
   // Create the query for products
   const query = kitchenId ? { kitchenId } : {};
@@ -93,7 +93,7 @@ exports.getAllProducts = catchAsyncError(async (req, res) => {
 
   // Filter and map products based on assignedCookerIds
   const data = products
-    .filter((item) => assignedCookerIds.includes(item.cookerId))
+    // .filter((item) => assignedCookerIds.includes(item.cookerId))
     .map((item) => {
       const {
         _id: id,
@@ -111,6 +111,7 @@ exports.getAllProducts = catchAsyncError(async (req, res) => {
         kitchenId
       };
     });
+    console.log(data, "DDDDDDDDDDDDDDDDDD")
 
   res.status(200).json({
     success: true,
