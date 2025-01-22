@@ -1,9 +1,14 @@
 const mongoose = require('mongoose');
 
 const containerAssignSchema = mongoose.Schema({
+  // containerID: {
+  //   type: String,
+  //   required: [true, 'Please enter Container ID'],
+  // },
   containerID: {
-    type: String,
-    required: [true, 'Please enter Container ID'],
+    type: Array,
+    default: [],
+    required: [true, 'Please enter Containers'],
   },
   cookerID: {
     type: String,

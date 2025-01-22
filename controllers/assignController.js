@@ -32,12 +32,13 @@ exports.createCookerAssign = catchAsyncError(async (req, res, next) => {
 
 exports.createContainerAssign = catchAsyncError(async (req, res, next) => {
   // req.body.admin = req.user.id;
-  const cont = await ContainerAssign.find({containerID: req.body.containerID})
+  // const cont = await ContainerAssign.find({containerID: req.body.containerID})
+  const cont = await ContainerAssign.find({containerID: { $in: req.body.containerID }})
   if(cont.length==0) {
-    const truck = await ContainerAssign.create(req.body);
+    const container = await ContainerAssign.create(req.body);
     res.status(200).json({
       success: true,
-      data: truck,
+      data: container,
     });
   }
   else {
@@ -57,9 +58,7 @@ exports.createTruckAssign = catchAsyncError(async (req, res, next) => {
   if(tru.length == 0 && truCont.length == 0) {
     const truck = await TruckAssign.create(req.body);
     const truckData = await truckModel.find({truckId: req.body.TruckID})
-    // const schoolData = await schoolModel.find({name: req.body.schoolName})
     const schoolData = await pathwayModel.find({name: req.body.schoolName})
-    // const conts = JSON.parse(req.body.containerID.replace(/'/g, '"'));
     const cookerDatas = await containerAssignModel.find({ containerID: { $in: req.body.containerID } })
 
     const cookerDatasWithDetails = await Promise.all(
